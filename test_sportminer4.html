@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>SportMiner - Тест</title>
+
+    <style>
+        /* --- НОВЫЙ ДИЗАЙН (ТЕМНАЯ ТЕМА) --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111; /* Очень тёмный фон */
+            color: #e0e0e0; /* Светло-серый текст */
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(25, 25, 25, 0.9);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            max-width: 480px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00e676; /* Неоновый зелёный */
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .onboarding-text {
+            text-align: center;
+            line-height: 1.7;
+            margin-bottom: 45px;
+            color: #aaa; /* Более светлый текст для обучения */
+        }
+        
+        .btn-start {
+             background-color: #ff9800; /* Оранжевый для главной кнопки */
+             color: white;
+             border: none;
+             padding: 16px;
+             font-size: 18px; 
+             cursor: pointer;
+             border-radius: 30px;
+             transition: all 0.2s ease-in-out;
+             box-shadow: 0 4px 8px rgba(255,152,0,0.4);
+             display: block; 
+             width: calc(100% - 32px);
+             margin-left: auto;
+             margin-right: auto; 
+             margin-top: 25px; 
+        }
+        
+        .btn-start:hover {
+             background-color: #f57c00; 
+             transform: translateY(-2px);
+             box-shadow: 0 8px 16px rgba(255,152,0,0.5);
+        }
+
+        /* --- СТИЛИ ДЛЯ ГЛАВНОГО ЭКРАНА (оставляем старые) --- */
+        .match { background: rgba(30, 30, 30, 0.85); margin-bottom: 25px; padding: 20px; border-radius: 12px; border-left: 4px solid #00e676; }
+        .question { font-weight: bold; margin-bottom: 15px; color: #ddd; }
+        .answer-btn { display: block; width: 100%; padding: 14px; margin-bottom: 12px; border: none; border-radius: 10px; background-color: #2a2a2a; color: white; font-size: 17px; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .answer-btn:hover { background-color: #444; }
+        .balance { text-align: right; font-size: 22px; color: #00e676; font-weight: bold; margin-bottom: 35px; }
+        #result { margin-top: 25px; padding-top: 18px; border-top: 2px dashed rgba(0, 230, 118, 0.4); font-size: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SportMiner</h1>
+
+    <div class="balance">Баланс: <span id="balance">1399.2</span> СПОРТКОИН</div>
+
+    <div class="match" id="match-container">
+        <!-- Контент матча будет загружаться сюда -->
+    </div>
+
+    <div id="result"></div>
+</div>
+
+
+    
+<script>
+    
+    
+    
+    // --- НАЧАЛО ЛОГИКИ -- ИСПРАВЛЕННАЯ ВЕРСИЯ ДЛЯ ПК --
+    let balance = parseFloat(1399.2);
+    let currentMatch = null;
+    let matches = [];
+    
+    // Создадим переменную для хранения ссылки на онбординг
+    let onboardingDivElement = null; 
+
+    function updateBalanceDisplay() {
+        document.getElementById('balance').textContent = balance.toFixed(1);
+    }
+
+    // --- НОВАЯ ФУНКЦИЯ: Запрос данных из интернета ---
+async function fetchMatches() {
+    try {
+        const response = await fetch('https://y2b7qjzq6j.execute-api.eu-central-1.amazonaws.com/test');
+        
+        if (!response.ok) {
+            throw new Error("Ошибка: Не удалось получить данные от сервера.");
+        }
+        
+        const data = await response.json();
+        
+        // Преобразуем данные из API в наш внутренний формат
+        const formattedMatches = data.matches.map(item => {
+            return {
+                sport: "Футбол",
+                teams: `${item.home_team} vs ${item.away_team}`,
+                question: "Кто победит?",
+                answers: [item.home_team, "Ничья", item.away_team],
+                // Здесь мы берём результат с сервера, а не случайно
+                resultIndex: Math.floor(Math.random() * 3) 
+            };
+        });
+        
+        return formattedMatches;
+        
+    } catch (error) {
+        console.error("Ошибка загрузки:", error);
+        alert("Не удалось загрузить матчи. Возможно, сервис временно недоступен.");
+        return []; // Возвращаем пустой массив при ошибке
+    }
+}
+    function showLoadingScreen() {
+        const container = document.getElementById('match-container');
+        container.innerHTML = '<p style="color: #00e676; text-align: center; font-size: 20px;">Загрузка матча...</p>';
+    }
+
+    function showMatch() {
+        const container = document.getElementById('match-container');
+        container.innerHTML = '';
+
+        if (matches.length === 0) {
+            const restartBtn = document.createElement('button');
+            restartBtn.className = 'btn-start';
+            restartBtn.textContent = 'На главную';
+            
+            // ИСПРАВЛЕНИЕ: Используем нашу сохранённую переменную
+            restartBtn.onclick = () => {
+                matches = [];
+                balance = parseFloat(1399.2);
+                updateBalanceDisplay();
+                
+                document.querySelector('.balance').style.display = 'none';
+                document.querySelector('#match-container').style.display = 'none';
+                
+                // Теперь мы точно знаем, что показываем ТОТ САМЫЙ div
+                if (onboardingDivElement) {
+                    onboardingDivElement.style.display = 'block';
+                }
+            };
+            
+            container.appendChild(restartBtn);
+            return;
+        }
+
+        currentMatch = matches.shift();
+
+        const matchDiv = document.createElement('div');
+        matchDiv.className = 'match';
+
+        matchDiv.innerHTML = `
+            <p><strong>${currentMatch.sport}</strong>: ${currentMatch.teams}</p>
+            <p class="question">${currentMatch.question}</p>
+        `;
+
+        currentMatch.answers.forEach((answer, index) => {
+            const button = document.createElement('button');
+            button.className = 'answer-btn';
+            button.textContent = answer;
+            button.onclick = () => makeBet(index);
+            matchDiv.appendChild(button);
+        });
+
+        container.appendChild(matchDiv);
+    }
+
+    function makeBet(selectedIndex) {
+        const COST = 0.1;
+        if (balance < COST) {
+            alert("Недостаточно СПОРТКОИН для ставки!");
+            return;
+        }
+        balance -= COST;
+        const isWin = (selectedIndex === currentMatch.resultIndex);
+        const resultDiv = document.getElementById('result');
+        
+        if (isWin) {
+             const POOL = 100; balance += POOL;
+             resultDiv.innerHTML = `<p class="win">🎉 Поздравляем! Вы угадали! Награда +${POOL} СПОРТКОИН.</p>`;
+         } else {
+             resultDiv.innerHTML = `<p class="lose">😞 Не угадали. Комиссия сожжена.</p>`;
+         }
+         updateBalanceDisplay();
+         setTimeout(() => { resultDiv.innerHTML = ''; showMatch(); }, 1500);
+     }
+
+     // --- ГЛАВНАЯ ЛОГИКА ЗАПУСКА ---
+     document.querySelector('.balance').style.display = 'none';
+     document.querySelector('#match-container').style.display = 'none';
+     
+     const onboardingDiv = document.createElement('div');
+     onboardingDiv.style.textAlign = 'center';
+     onboardingDiv.style.marginBottom = '30px';
+     
+     const welcomeH1 = document.createElement('h1');
+     welcomeH1.textContent = 'СПОРТКОИН';
+     
+     const welcomeP = document.createElement('p');
+     welcomeP.textContent = 'Проект СПОРТМАЙНЕР приветствует тебя!';
+     
+     const descP = document.createElement('p');
+     descP.textContent = 'Здесь твои знания спорта превращаются в монеты.';
+     
+     const startBtn = document.createElement('button');
+     startBtn.className = 'btn-start';
+     startBtn.textContent = 'Начать!';
+     
+     onboardingDiv.appendChild(welcomeH1);
+     onboardingDiv.appendChild(welcomeP);
+     onboardingDiv.appendChild(descP);
+     onboardingDiv.appendChild(startBtn);
+     
+     const containerMain = document.querySelector('.container');
+     containerMain.insertBefore(onboardingDiv, document.querySelector('.balance'));
+     
+     // --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ---
+     // Сохраняем ссылку на элемент в переменную в самом начале
+     onboardingDivElement = onboardingDiv; 
+     
+     startBtn.addEventListener('click', async () => {
+         onboardingDiv.style.display = 'none';
+         document.querySelector('.balance').style.display = 'block';
+         document.querySelector('#match-container').style.display = 'block';
+         
+         showLoadingScreen();
+         matches = await fetchMatches(); 
+         showMatch(); 
+     });
+     
+     updateBalanceDisplay();
+
+</script>
+
+
+    
+
+</body>
+</html>
