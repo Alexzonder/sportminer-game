@@ -78,6 +78,9 @@ const updateBalanceDisplay = () => {
     document.getElementById('balance').textContent = balance.toFixed(1);
 };
 
+
+
+
 function selectSport(sport) {
     // Прячем выбор спорта
     document.getElementById('sport-selection').style.display = 'none';
@@ -87,14 +90,19 @@ function selectSport(sport) {
     document.getElementById('match-empty').style.display = 'none';
 
     if (sport === 'Футбол') {
+         // Показываем баланс и матч
          document.getElementById('main-balance').style.display = 'block';
-         document.getElementById('match-football').style.display = 'block';
+         document.getElementById('match-football').style.display = 'block'; // <-- ЭТА СТРОКА БЫЛА НУЖНА
          currentMatch = {resultIndex: Math.floor(Math.random() * 3)};
      } else {
+         // Показываем только заглушку (баланс скрыт)
          document.getElementById('main-balance').style.display = 'none';
          document.getElementById('match-empty').style.display = 'block';
      }
 }
+
+
+
 
 function makeBet(index) {
     const COST = 0.1;
@@ -123,9 +131,8 @@ function makeBet(index) {
 }
 
 function goBack() {
-     // --- ИСПРАВЛЕНИЕ ---
      // Очищаем контейнер от старого контента перед возвратом
-     document.getElementById('match-container').innerHTML = ''; 
+     document.getElementById('match-container').innerHTML = ''; // <-- ЭТА СТРОКА БЫЛА НУЖНА
      
      document.getElementById('sport-selection').style.display = 'block';
      document.getElementById('main-balance').style.display = 'none';
