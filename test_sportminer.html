@@ -105,26 +105,28 @@ const updateBalanceDisplay = () => {
 
 // --- ФУНКЦИЯ форматирования даты ---
 function formatDate(datetimeStr) {
-    const now = new Date();
-    const matchDate = new Date(datetimeStr);
-    
-    // Если матч сегодня
-    if (
-        now.getDate() === matchDate.getDate() &&
-        now.getMonth() === matchDate.getMonth() &&
-        now.getFullYear() === matchDate.getFullYear()
-    ) {
-        return `Сегодня в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
-    }
-    
-    // Иначе показываем дату и время
-    // Добавляем +1 к месяцу и используем padStart для красивого вывода (01, 02...)
-    const day = String(matchDate.getDate()).padStart(2, '0');
-    const month = String(matchDate.getMonth() + 1).padStart(2, '0'); // ИСПРАВЛЕНО: +1 к месяцу
-    
-    return `${day}.${month} в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
-}
+    const now = new Date(); // Текущая дата на компьютере пользователя
+    const matchDate = new Date(datetimeStr); // Дата из файла matches.json
 
+    // Проверяем, совпадает ли год, месяц и день матча с сегодняшним днем
+    const isToday = (
+        now.getFullYear() === matchDate.getFullYear() &&
+        now.getMonth() === matchDate.getMonth() &&
+        now.getDate() === matchDate.getDate()
+    );
+
+    if (isToday) {
+        // Если матч сегодня, пишем просто "Сегодня в 19:00"
+        return `Сегодня в ${matchDate.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}`;
+    } else {
+        // Если матч не сегодня, пишем "16.04 в 19:00"
+        // padStart(2, '0') добавляет ноль перед однозначными числами (4 -> 04)
+        const day = String(matchDate.getDate()).padStart(2, '0');
+        const month = String(matchDate.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 до 11, поэтому +1
+
+        return `${day}.${month} в ${matchDate.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}`;
+    }
+}
 
 
 // --- ФУНКЦИЯ (ВЕРСИЯ ФИНАЛЬНАЯ): Загрузка данных из matches.json ---
