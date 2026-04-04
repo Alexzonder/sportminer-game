@@ -190,13 +190,14 @@ function showMatch() {
          return;
      }
 
-     // Показываем список матчей с кнопкой "Сделать ставку"
-     matches.forEach((matchData, index) => {
+     // --- ИСПРАВЛЕНИЕ ---
+     // Используем обычный цикл for, чтобы правильно передавать индекс
+     for (let i = 0; i < matches.length; i++) {
+         const matchData = matches[i];
          const matchDiv = document.createElement('div');
          matchDiv.className = 'match';
          matchDiv.style.marginBottom = '15px';
 
-         // Выводим время начала матча в новом формате
          const timeString = formatDate(matchData.datetime);
 
          matchDiv.innerHTML = `
@@ -207,15 +208,18 @@ function showMatch() {
          const button = document.createElement('button');
          button.className = 'answer-btn';
          button.textContent = 'Сделать ставку';
-         button.onclick = () => loadBetScreen(index);
+         
+         // Передаём индекс в функцию loadBetScreen
+         button.onclick = () => loadBetScreen(i); 
+         
          matchDiv.appendChild(button);
-
          container.appendChild(matchDiv);
-     });
+     }
 }
 
-// --- ФУНКЦИЯ: Загрузка экрана ставок ---
+
 function loadBetScreen(index) {
+    // --- ИСПРАВЛЕНИЕ ---
     // Удаляем этот матч из общего списка, чтобы он не показывался снова
     currentMatch = matches.splice(index, 1)[0];
     
