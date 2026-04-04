@@ -127,16 +127,24 @@ function makeBet(index) {
 
     setTimeout(() => {
         resultDiv.innerHTML = '';
+        // --- ДОБАВЬ ЭТУ СТРОКУ ---
+        document.getElementById('match-football').style.display = 'none'; // Скрываем блок с вопросом после ставки
     }, 1500);
 }
 
+
 function goBack() {
-     // Очищаем контейнер от старого контента перед возвратом
-     document.getElementById('match-container').innerHTML = ''; // <-- ЭТА СТРОКА БЫЛА НУЖНА
-     
-     document.getElementById('sport-selection').style.display = 'block';
-     document.getElementById('main-balance').style.display = 'none';
-     document.getElementById('result').innerHTML = '';
+    // 1. Прячем баланс и результат
+    document.getElementById('main-balance').style.display = 'none';
+    document.getElementById('result').innerHTML = '';
+
+    // 2. Возвращаемся на страницу выбора спорта
+    // Прячем заглушку и матч (на всякий случай)
+    document.getElementById('match-empty').style.display = 'none';
+    document.getElementById('match-football').style.display = 'none';
+    
+    // Показываем выбор спорта
+    document.getElementById('sport-selection').style.display = 'block';
 }
 
 
