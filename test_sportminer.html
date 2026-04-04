@@ -156,23 +156,14 @@ async function fetchMatches() {
         if (matches.length === 0) {
             const restartBtn = document.createElement('button');
             restartBtn.className = 'btn-start';
-            restartBtn.textContent = 'На главную';
+            restartBtn.textContent = 'Выбрать другой спорт';
             
-            // ИСПРАВЛЕНИЕ: Используем нашу сохранённую переменную
             restartBtn.onclick = () => {
                 matches = [];
-                balance = parseFloat(1399.2);
-                updateBalanceDisplay();
-                
-                document.querySelector('.balance').style.display = 'none';
-                document.querySelector('#match-container').style.display = 'none';
-                
-                // Теперь мы точно знаем, что показываем ТОТ САМЫЙ div
-                if (onboardingDivElement) {
-                    onboardingDivElement.style.display = 'block';
-                }
+                document.getElementById('sport-selection').style.display = 'block';
+                document.getElementById('main-balance').style.display = 'none';
+                document.getElementById('match-container').innerHTML = '';
             };
-            
             container.appendChild(restartBtn);
             return;
         }
@@ -181,9 +172,19 @@ async function fetchMatches() {
 
         const matchDiv = document.createElement('div');
         matchDiv.className = 'match';
+        matchDiv.style.marginBottom = '15px';
+
+        // --- ИЗМЕНЕНИЕ: Теперь мы выводим и время ---
+        const timeString = new Date(currentMatch.datetime).toLocaleString('ru-RU', {
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit'
+        });
 
         matchDiv.innerHTML = `
             <p><strong>${currentMatch.sport}</strong>: ${currentMatch.teams}</p>
+            <p style="color: #aaa; font-size: 14px;">Начало: ${timeString}</p>
             <p class="question">${currentMatch.question}</p>
         `;
 
