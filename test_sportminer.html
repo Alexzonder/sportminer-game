@@ -113,8 +113,8 @@
             const data = await response.json();
             
             // Фильтруем данные по выбранному спорту и сортируем по времени
-            const filteredData = data.filter(item => item.sport.toLowerCase() === 			selectedSport.toLowerCase())
-                .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+            const filteredData = data.filter(item => item.sport.toLowerCase() === selectedSport.toLowerCase())
+                                     .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
             
             return filteredData;
             
