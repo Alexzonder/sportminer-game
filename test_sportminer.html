@@ -64,16 +64,16 @@
 <div class="container">
     <h1>SportMiner</h1>
 
-    <!-- ЭТОТ БЛОК ПОКАЗЫВАЕТСЯ СРАЗУ -->
-    <div id="onboarding-div" style="text-align: center; margin-bottom: 30px; display: none;">
+    <!-- Блок онбординга (появляется ПЕРВЫМ и ВИДЕН при загрузке) -->
+    <div id="onboarding-div" style="text-align:center; margin-bottom:30px;"> 
         <h1>СПОРТКОИН</h1>
         <p>Проект СПОРТМАЙНЕР приветствует тебя!</p>
         <p>Здесь твои знания спорта превращаются в монеты.</p>
         <button class="btn-start" id="start-btn">Начать!</button>
     </div>
 
-    <!-- ЭТОТ БЛОК ПОКАЗЫВАЕТСЯ ПОСЛЕ НАЖАТИЯ "НАЧАТЬ!" -->
-    <div id="sport-selection" class="match" style="display: none;">
+    <!-- БЛОК ВЫБОРА СПОРТА -->
+    <div id="sport-selection" class="match" style="display:none; margin-bottom:35px;"> 
         <p class="question">Выбери дисциплину:</p>
         <button class="answer-btn" onclick="selectSport('Футбол')">Футбол</button>
         <button class="answer-btn" onclick="selectSport('Хоккей')">Хоккей</button>
@@ -81,17 +81,19 @@
         <button class="answer-btn" onclick="selectSport('Киберспорт')">Киберспорт</button>
     </div>
 
-    <div class="balance" id="main-balance" style="display: none;">Баланс: <span id="balance">1399.2</span> СПОРТКОИН</div>
+    <!-- Блок баланса -->
+    <div class="balance" id="main-balance" style="display:none;">Баланс: <span id="balance">1399.2</span> СПОРТКОИН</div>
 
+    <!-- Контейнер для матчей или заглушки -->
     <div class="match" id="match-container">
-        <!-- Здесь будут матчи выбранного спорта -->
     </div>
 
+    <!-- Зеленый пунктир -->
     <div id="result"></div>
 </div>
 
 <script>
-// --- НАЧАЛО ЛОГИКИ -- ФИНАЛЬНАЯ ВЕРСИЯ ---
+// --- НАЧАЛО ЛОГИКИ -- ПОЛНОСТЬЮ ПЕРЕПИСАНО ---
 let balance = parseFloat(1399.2);
 let currentMatch = null;
 let matches = [];
@@ -101,80 +103,63 @@ const updateBalanceDisplay = () => {
     document.getElementById('balance').textContent = balance.toFixed(1);
 };
 
-// --- ФУНКЦИЯ форматирования даты (ИСПРАВЛЕННАЯ) ---
+// --- ФУНКЦИЯ форматирования даты ---
 function formatDate(datetimeStr) {
     const now = new Date();
     const matchDate = new Date(datetimeStr);
     
-    // Проверяем, совпадает ли год, месяц и день матча с сегодняшним днем
-    const isToday = (
-        now.getFullYear() === matchDate.getFullYear() &&
+    if (
+        now.getDate() === matchDate.getDate() &&
         now.getMonth() === matchDate.getMonth() &&
-        now.getDate() === matchDate.getDate()
-    );
-
-    if (isToday) {
+        now.getFullYear() === matchDate.getFullYear()
+    ) {
         return `Сегодня в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
-    } else {
-        // Используем padStart для добавления ведущих нулей (например, "04" вместо "4")
-        const day = String(matchDate.getDate()).padStart(2, '0');
-        const month = String(matchDate.getMonth() + 1).padStart(2, '0'); // Месяцы с 0 до 11
-        
-        return `${day}.${month} в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
     }
+    
+    const day = String(matchDate.getDate()).padStart(2, '0');
+    const month = String(matchDate.getMonth() + 1).padStart(2, '0');
+    return `${day}.${month} в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
 }
 
-// --- ФУНКЦИЯ загрузки данных ---
+// --- ЗАГЛУШКА ДАННЫХ ---
 async function fetchMatches() {
-    try {
-        const response = await fetch('matches.json');
-        
-        if (!response.ok) {
-            throw new Error("Ошибка загрузки данных.");
-        }
-        
-        const data = await response.json();
-        
-        // Фильтруем и сортируем
-        const filteredData = data.filter(item => item.sport.toLowerCase() === selectedSport.toLowerCase())
-                                 .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-        
-        return filteredData;
-        
-    } catch (error) {
-        console.error("Ошибка загрузки:", error);
-        alert("Не удалось загрузить матчи. Проверь интернет и файл matches.json.");
-        return [];
-    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return [{
+        sport: "Футбол",
+        home_team: "Зенит",
+        away_team: "Спартак",
+        datetime: "2025-04-04T19:00:00",
+        question: "Кто победит?",
+        answers: ["Зенит", "Ничья", "Спартак"],
+        resultIndex: Math.floor(Math.random() * 3)
+    }];
 }
 
 // --- ФУНКЦИЯ выбора спорта ---
-async function selectSport(sport) {
+function selectSport(sport) {
     selectedSport = sport;
     
+    // Прячем выбор спорта
     document.getElementById('sport-selection').style.display = 'none';
-    document.getElementById('main-balance').style.display = 'block';
     
-    showLoadingScreen();
-    
-    matches = await fetchMatches(); 
-    
-    if (matches.length === 0) {
-        alert("По данному спорту нет доступных матчей.");
-        document.getElementById('sport-selection').style.display = 'block';
-        document.getElementById('main-balance').style.display = 'none';
-        return;
-    }
-    
-    showMatch();
+    // Если выбран Футбол - показываем баланс и грузим матч
+    if (sport === 'Футбол') {
+         document.getElementById('main-balance').style.display = 'block';
+         showLoadingScreen();
+         matches = fetchMatches(); 
+         showMatch(); 
+     } else {
+         // Если выбрано другое - скрываем баланс и показываем заглушку
+         document.getElementById('main-balance').style.display = 'none';
+         showEmptyScreen();
+     }
 }
 
 function showLoadingScreen() {
     const container = document.getElementById('match-container');
-    container.innerHTML = '<p style="color: #00e676; text-align: center; font-size: 20px;">Загрузка матчей...</p>';
+    container.innerHTML = '<p style="color: #00e676; text-align: center; font-size: 20px;">Загрузка матча...</p>';
 }
 
-// --- ФУНКЦИЯ показа списка матчей (ИСПРАВЛЕННАЯ) ---
 function showMatch() {
     const container = document.getElementById('match-container');
     container.innerHTML = '';
@@ -183,7 +168,6 @@ function showMatch() {
          const restartBtn = document.createElement('button');
          restartBtn.className = 'btn-start';
          restartBtn.textContent = 'Выбрать другой спорт';
-         
          restartBtn.onclick = () => {
              matches = [];
              document.getElementById('sport-selection').style.display = 'block';
@@ -194,62 +178,59 @@ function showMatch() {
          return;
      }
 
-     // Используем цикл for для стабильной работы с индексами
-     for (let i = matches.length - 1; i >= 0; i--) { // Обратный цикл для безопасности splice
-         const matchData = matches[i];
-         const matchDiv = document.createElement('div');
-         matchDiv.className = 'match';
-         matchDiv.style.marginBottom = '15px';
+     currentMatch = matches.shift();
+     const matchDiv = document.createElement('div');
+     matchDiv.className = 'match';
+     const timeString = formatDate(currentMatch.datetime);
 
-         const timeString = formatDate(matchData.datetime);
+     matchDiv.innerHTML = `
+         <p><strong>${currentMatch.sport}</strong>: ${currentMatch.home_team} vs ${currentMatch.away_team}</p>
+         <p style="color: #aaa; font-size: 14px;">Начало: ${timeString}</p>
+         <p class="question">${currentMatch.question}</p>
+     `;
 
-         matchDiv.innerHTML = `
-             <p><strong>${matchData.home_team} vs ${matchData.away_team}</strong></p>
-             <p style="color: #aaa; font-size: 14px;">Начало: ${timeString}</p>
-         `;
-
+     currentMatch.answers.forEach((answer, index) => {
          const button = document.createElement('button');
          button.className = 'answer-btn';
-         button.textContent = 'Сделать ставку';
-         
-         // Передаем индекс для удаления
-         button.onclick = () => loadBetScreen(i); 
-         
+         button.textContent = answer;
+         button.onclick = () => makeBet(index);
          matchDiv.appendChild(button);
-         container.appendChild(matchDiv);
-     }
+     });
+
+     container.appendChild(matchDiv);
 }
 
-// --- ФУНКЦИЯ экрана ставок (ИСПРАВЛЕННАЯ) ---
-function loadBetScreen(index) {
-    // Удаляем матч из массива по индексу и сохраняем его в currentMatch
-    currentMatch = matches.splice(index, 1)[0];
-    
+// --- ФУНКЦИЯ экрана "Здесь пока пусто" ---
+function showEmptyScreen() {
     const container = document.getElementById('match-container');
     container.innerHTML = '';
 
-    const matchDiv = document.createElement('div');
-    matchDiv.className = 'match';
-
-    matchDiv.innerHTML = `
-        <p><strong>${selectedSport}</strong>: ${currentMatch.home_team} vs ${currentMatch.away_team}</p>
-        <p class="question">${currentMatch.question}</p>
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'match';
+    emptyDiv.innerHTML = `
+        <p style="color:#aaa; text-align:center; font-size:18px;">ЗДЕСЬ ПОКА ПУСТО</p>
+        <p style="color:#aaa; text-align:center; font-size:16px;">Данная дисциплина находится в разработке.</p>
     `;
-
-    currentMatch.answers.forEach((answer) => {
-        const button = document.createElement('button');
-        button.className = 'answer-btn';
-        button.textContent = answer;
-        
-        // Передаем индекс ответа при клике
-        button.onclick = makeBet.bind(null, currentMatch.answers.indexOf(answer));
-            
-        matchDiv.appendChild(button);
-    });
-
-    container.appendChild(matchDiv);
+    
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn-start';
+    backBtn.textContent = 'НАЗАД';
+    backBtn.style.marginTop = '25px';
+    
+    backBtn.onclick = () => {
+         // Возвращаемся на страницу выбора дисциплины
+         document.getElementById('sport-selection').style.display = 'block';
+         
+         // Очищаем контейнер матча и скрываем баланс/результат
+         document.getElementById('match-container').innerHTML = '';
+         document.getElementById('main-balance').style.display = 'none';
+         document.getElementById('result').innerHTML = '';
+     };
+    
+     container.appendChild(emptyDiv);
 }
- 
+
+
 function makeBet(selectedIndex) {
     const COST = 0.1;
 
@@ -259,11 +240,7 @@ function makeBet(selectedIndex) {
     }
 
     balance -= COST;
-    
-    // Генерируем случайный результат в пределах доступных ответов
-    const resultIndex = Math.floor(Math.random() * currentMatch.answers.length); 
-    
-    const isWin = (selectedIndex === resultIndex);
+    const isWin = (selectedIndex === currentMatch.resultIndex);
 
     const resultDiv = document.getElementById('result');
     
@@ -279,16 +256,24 @@ function makeBet(selectedIndex) {
 
     setTimeout(() => {
         resultDiv.innerHTML = '';
-        showMatch(); // Возвращаемся к обновленному списку матчей
+        showMatch(); 
     }, 1500);
 }
 
-// --- ИНИЦИАЛИЗАЦИЯ ---
-document.getElementById('onboarding-div').style.display = 'block';
+
+// --- ГЛАВНАЯ ЛОГИКА ЗАПУСКА ---
+// Прячем всё при старте (кроме онбординга)
+document.querySelector('.balance').style.display = 'none';
+document.querySelector('#match-container').style.display = 'none';
+document.getElementById('result').style.display = 'none'; 
+
+// Логика кнопки "Начать!"
 document.getElementById('start-btn').addEventListener('click', () => {
     document.getElementById('onboarding-div').style.display = 'none';
-    document.getElementById('sport-selection').style.display = 'block';
+    document.getElementById('sport-selection').style.display = 'block'; 
 });
+
+
 updateBalanceDisplay();
 </script>
 </body>
