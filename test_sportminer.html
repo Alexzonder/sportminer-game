@@ -75,10 +75,10 @@
     <!-- ЭТОТ БЛОК ПОКАЗЫВАЕТСЯ ПОСЛЕ НАЖАТИЯ "НАЧАТЬ!" -->
     <div id="sport-selection" class="match" style="display: none;">
         <p class="question">Выбери дисциплину:</p>
-        <button class="answer-btn" onclick="selectSport('football')">Футбол</button>
-        <button class="answer-btn" onclick="selectSport('hockey')">Хоккей</button>
-        <button class="answer-btn" onclick="selectSport('basketball')">Баскетбол</button>
-        <button class="answer-btn" onclick="selectSport('esports')">Киберспорт</button>
+        <button class="answer-btn" onclick="selectSport('Футбол')">Футбол</button>
+        <button class="answer-btn" onclick="selectSport('Хоккей')">Хоккей</button>
+        <button class="answer-btn" onclick="selectSport('Баскетбол')">Баскетбол</button>
+        <button class="answer-btn" onclick="selectSport('Киберспорт')">Киберспорт</button>
     </div>
 
     <div class="balance" id="main-balance" style="display: none;">Баланс: <span id="balance">1399.2</span> СПОРТКОИН</div>
@@ -113,7 +113,7 @@
             const data = await response.json();
             
             // Фильтруем данные по выбранному спорту и сортируем по времени
-            const filteredData = data.filter(item => item.sport.toLowerCase() === selectedSport)
+            const filteredData = data.filter(item => item.sport === selectedSport)
                                      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
             
             return filteredData;
@@ -212,7 +212,7 @@
          matchDiv.className = 'match';
  
          matchDiv.innerHTML = `
-             <p><strong>${selectedSport.toUpperCase()}</strong>: ${currentMatch.home_team} vs ${currentMatch.away_team}</p>
+             <p><strong>${selectedSport}</strong>: ${currentMatch.home_team} vs ${currentMatch.away_team}</p>
              <p class="question">${currentMatch.question}</p>
          `;
  
