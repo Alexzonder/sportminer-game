@@ -108,23 +108,25 @@
 
 
 
-    // --- НОВАЯ ФУНКЦИЯ: Запрос данных из НАШЕГО файла matches.json ---
+    // --- НОВАЯ ФУНКЦИЯ: Запрос данных из файла matches.json (ВЕРСИЯ 2) ---
 async function fetchMatches() {
     try {
-        // Игра теперь будет брать данные прямо из файла в твоём репозитории
         const response = await fetch('matches.json');
         
         if (!response.ok) {
-            throw new Error("Ошибка: Не удалось найти файл с данными.");
+            throw new Error("Ошибка: Файл с данными не найден.");
         }
         
         const data = await response.json();
         
-        // Преобразуем данные из нашего файла в формат игры
-        const formattedMatches = data.map(item => {
+        // Сортируем матчи по времени (ближайшие первыми)
+        const sortedData = data.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        
+        const formattedMatches = sortedData.map(item => {
             return {
                 sport: item.sport,
                 teams: item.teams,
+                datetime: item.datetime, // Новое поле: дата и время
                 question: item.question,
                 answers: item.answers,
                 resultIndex: Math.floor(Math.random() * 3) 
@@ -134,8 +136,8 @@ async function fetchMatches() {
         return formattedMatches;
         
     } catch (error) {
-        console.error("Ошибка загрузки:", error);
-        alert("Не удалось загрузить матчи. Возможно, файл данных отсутствует или сервер GitHub недоступен.");
+        console.error("Ошибка загрузки данных:", error);
+        alert("Не удалось загрузить матчи. Убедись, что файл matches.json загружен на GitHub.");
         return []; 
     }
 }
