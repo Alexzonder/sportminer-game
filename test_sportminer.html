@@ -204,6 +204,10 @@
      // --- ФУНКЦИЯ: Загрузка экрана ставок ---
      function loadBetScreen(index) {
          currentMatch = matches[index];
+
+	 // --- ИЗМЕНЕНИЕ ---
+         // Удаляем этот матч из общего списка, чтобы он не показывался снова
+         matches.splice(index, 1);
          
          const container = document.getElementById('match-container');
          container.innerHTML = '';
