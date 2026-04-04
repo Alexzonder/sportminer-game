@@ -101,6 +101,8 @@ const updateBalanceDisplay = () => {
     document.getElementById('balance').textContent = balance.toFixed(1);
 };
 
+
+
 // --- ФУНКЦИЯ форматирования даты ---
 function formatDate(datetimeStr) {
     const now = new Date();
@@ -116,8 +118,14 @@ function formatDate(datetimeStr) {
     }
     
     // Иначе показываем дату и время
-    return `${matchDate.getDate()}.${matchDate.getMonth()+1} в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
+    // Добавляем +1 к месяцу и используем padStart для красивого вывода (01, 02...)
+    const day = String(matchDate.getDate()).padStart(2, '0');
+    const month = String(matchDate.getMonth() + 1).padStart(2, '0'); // ИСПРАВЛЕНО: +1 к месяцу
+    
+    return `${day}.${month} в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
 }
+
+
 
 // --- ФУНКЦИЯ (ВЕРСИЯ ФИНАЛЬНАЯ): Загрузка данных из matches.json ---
 async function fetchMatches() {
