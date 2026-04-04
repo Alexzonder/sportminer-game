@@ -125,6 +125,24 @@
         }
     }
 
+    // --- ФУНКЦИЯ форматирования даты ---
+    function formatDate(datetimeStr) {
+        const now = new Date();
+        const matchDate = new Date(datetimeStr);
+        
+        const options = { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' };
+        
+        if (
+            now.getDate() === matchDate.getDate() &&
+            now.getMonth() === matchDate.getMonth() &&
+            now.getFullYear() === matchDate.getFullYear()
+        ) {
+            return `Сегодня в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
+        }
+        
+        return `${matchDate.getDate()}.${matchDate.getMonth()+1} в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}`;
+    }
+    
     // --- ФУНКЦИЯ: Выбор спорта ---
     async function selectSport(sport) {
         selectedSport = sport;
@@ -178,13 +196,8 @@
              matchDiv.className = 'match';
              matchDiv.style.marginBottom = '15px';
 
-             // Выводим время начала матча
-             const timeString = new Date(matchData.datetime).toLocaleString('ru-RU', {
-                 hour: '2-digit',
-                 minute: '2-digit',
-                 day: '2-digit',
-                 month: '2-digit'
-             });
+             // Выводим время начала матча в новом формате
+             const timeString = formatDate(matchData.datetime);
 
              matchDiv.innerHTML = `
                  <p><strong>${matchData.home_team} vs ${matchData.away_team}</strong></p>
