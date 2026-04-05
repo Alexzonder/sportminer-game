@@ -184,13 +184,13 @@ async function showMatchesPage() {
             container.appendChild(matchDiv);
         });
         
-        // 4. Показываем баланс
+        // 4. Показываем баланс (ВЫНЕСЕНО ИЗ ЦИКЛА)
         let balanceDiv = document.createElement('div');
         balanceDiv.className = 'balance';
         balanceDiv.textContent = `Баланс: ${balance.toFixed(1)} СПОРТКОИН`;
         
-        let containerRef = document.getElementById('matches-container');
-        containerRef.insertBefore(balanceDiv, containerRef.firstChild.nextSibling); 
+        // Вставляем баланс в самый конец списка
+        container.appendChild(balanceDiv); 
 
         document.getElementById('page-number').textContent = '4';
 
@@ -199,6 +199,7 @@ async function showMatchesPage() {
         container.innerHTML = '<p style="color:red;">Не удалось загрузить список матчей.</p>';
     }
 }
+
 
 // Функция для перехода на страницу ставки (ИСПРАВЛЕННАЯ)
 function goToMatchPage(matchId) {
