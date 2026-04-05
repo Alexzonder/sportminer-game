@@ -217,11 +217,15 @@ function goToMatchPage(matchId) {
         document.getElementById('bet-match-title').textContent = `${matchData.number} ${matchData.home} vs ${matchData.away}`;
         document.getElementById('bet-match-time').textContent = `Начало матча в ${matchData.time}`;
         
+        // --- ИСПРАВЛЕНИЕ ---
+        // Берём номер из ID матча (match-1 -> 1)
+        const matchNumber = matchId.replace('match-', ''); 
+        
         // Обновляем номер страницы
-        const matchNumber = matchData.number;
         document.getElementById('page-number').textContent = matchNumber;
     }
 }
+
 
 // Кнопка "Назад к матчам" на Странице ставки
 function goBackToMatches() {
