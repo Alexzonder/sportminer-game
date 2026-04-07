@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>SportMiner</title>
+    <style>
+        /* --- СТИЛИ (ТЕМНАЯ ТЕМА) --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(25, 25, 25, 0.9);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00e676;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .balance {
+            text-align: right;
+            font-size: 22px;
+            color: #00e676;
+            font-weight: bold;
+            margin-bottom: 35px;
+        }
+
+        .btn-start {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 30px;
+            display: block;
+            width: calc(100% - 32px);
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 25px;
+        }
+
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 10px;
+            background-color: #2a2a2a;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .answer-btn:hover {
+            background-color: #444;
+        }
+
+        .match {
+             background: rgba(30, 30, 30, 0.85);
+             margin-bottom: 25px;
+             padding: 20px;
+             border-radius: 12px;
+             border-left: 4px solid #00e676;
+        }
+
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        #result {
+            margin-top: 25px;
+            padding-top: 18px;
+            border-top: 2px dashed rgba(0, 230, 118, 0.4);
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SportMiner</h1>
+
+    <div class="balance">Баланс: <span id="balance-value">1399.2</span> СПОРТКОИН</div>
+
+    <!-- ПУСТОЙ КОНТЕЙНЕР ДЛЯ МАТЧЕЙ -->
+    <div id="match-container"></div>
+
+    <div id="result"></div>
+
+    <!-- КНОПКА "НАЧАТЬ!" -->
+    <button class="btn-start" id="start-btn">Начать!</button>
+</div>
+
+<script>
+// --- НАЧАЛО ЛОГИКИ --
+let balance = parseFloat(1399.2);
+let currentMatchData = null; // Здесь будут данные текущего матча
+
+// Функция обновления баланса на экране
+function updateBalance() {
+    document.getElementById('balance-value').textContent = balance.toFixed(1);
+}
+
+// --- ГЛАВНАЯ ФУНКЦИЯ ЗАГРУЗКИ ДАННЫХ ---
+async function loadData() {
+    try {
+        // Загружаем данные матчей и тексты интерфейса
+        const [matchesResponse, langResponse] = await Promise.all([
+            fetch('data.json'),
+            fetch('lang.json')
+        ]);
+
+        if (!matchesResponse.ok || !langResponse.ok) {
+             throw new Error("Ошибка загрузки данных");
+        }
+
+        const matches = await matchesResponse.json();
+        const lang = await langResponse.json();
+
+        return { matches, lang };
+
+    } catch (error) {
+        console.error(error);
+        alert("Не удалось загрузить данные. Проверь файлы data.json и lang.json.");
+        return { matches: [], lang: {} };
+    }
+}
+
+// --- ФУНКЦИЯ ОТРИСОВКИ МАТЧА ---
+function showMatch(match) {
+    const container = document.getElementById('match-container');
+    container.innerHTML = ''; // Очищаем контейнер
+
+    if (!match) {
+         container.innerHTML = '<p style="color:#aaa; text-align:center;">Матчей нет.</p>';
+         return;
+    }
+
+    currentMatchData = match; // Сохраняем данные для функции ставок
+
+    const matchDiv = document.createElement('div');
+    matchDiv.className = 'match';
+
+    // Собираем HTML для матча из данных JSON
+    matchDiv.innerHTML = `
+        <p class="question">${match.question}</p>
+    `;
+
+    // ДИНАМИЧЕСКИ СОЗДАЕМ КНОПКИ ОТВЕТОВ В ЦИКЛЕ
+    match.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.className = 'answer-btn';
+        button.textContent = answer.text; // Берем текст из JSON
+
+        // Вешаем обработчик клика
+        button.onclick = () => makeBet(answer.id); // Передаем ID ответа
+
+        matchDiv.appendChild(button);
+    });
+
+    container.appendChild(matchDiv);
+}
+
+// --- ФУНКЦИЯ СТАВКИ ---
+function makeBet(selectedAnswerId) {
+    const COST = 0.1;
+    if (balance < COST) {
+         alert("Недостаточно СПОРТКОИН для ставки!");
+         return;
+    }
+    balance -= COST;
+    updateBalance();
+
+    // Проверяем, угадал ли игрок
+    const isWin = (selectedAnswerId === currentMatchData.resultIndex);
+    
+    const resultDiv = document.getElementById('result');
+    
+    if (isWin) {
+         const POOL = Math.floor(Math.random() * (150 - 50 + 1)) + 50; // Рандом от 50 до 150
+         balance += POOL;
+         resultDiv.innerHTML = `<p class="win">🎉 Поздравляем! Вы угадали! Награда +${POOL} СПОРТКОИН.</p>`;
+     } else {
+         resultDiv.innerHTML = `<p class="lose">😞 Не угадали. Комиссия сожжена.</p>`;
+     }
+     updateBalance();
+     
+     // Показываем результат и переходим к следующему матчу через 2 секунды
+     setTimeout(() => {
+         resultDiv.innerHTML = '';
+         showNextMatch();
+     }, 2000);
+}
+
+// --- ЛОГИКА ПЕРЕХОДА К СЛЕДУЮЩЕМУ МАТЧУ ---
+let allMatches = []; // Массив со всеми матчами
+
+function showNextMatch() {
+    const nextMatch = allMatches.shift(); // Берем первый матч из массива и удаляем его
+    showMatch(nextMatch);
+}
+
+// --- ГЛАВНАЯ ФУНКЦИЯ СТАРТА ИГРЫ ---
+async function startGame() {
+    // Прячем кнопку "Начать!"
+    document.getElementById('start-btn').style.display = 'none';
+    
+    // Загружаем данные
+    const data = await loadData();
+    
+    // Сохраняем все матчи в глобальный массив
+    allMatches = data.matches.slice(); // Делаем копию массива
+
+    // Отрисовываем первый матч
+    showNextMatch();
+}
+
+// --- ИНИЦИАЛИЗАЦИЯ ---
+document.getElementById('start-btn').addEventListener('click', startGame);
+updateBalance(); // Показываем начальный баланс
+
+</script>
+
+</body>
+</html>
